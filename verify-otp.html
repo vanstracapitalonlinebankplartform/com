@@ -124,6 +124,7 @@
         </div>
     </div>
 
+    <script src="config.js"></script>
     <script>
         // Get URL parameters
         const urlParams = new URLSearchParams(window.location.search);
@@ -217,7 +218,7 @@
             successMsg.classList.remove('show');
 
             try {
-                const response = await fetch('/api/auth/verify-otp', {
+                const response = await fetch(`${API_CONFIG.API_BASE_URL}/auth/verify-otp`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -273,7 +274,7 @@
             errorMsg.classList.remove('show');
 
             try {
-                const response = await fetch('/api/auth/resend-otp', {
+                const response = await fetch(`${API_CONFIG.API_BASE_URL}/auth/resend-otp`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

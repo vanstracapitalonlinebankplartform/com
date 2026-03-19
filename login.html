@@ -119,6 +119,7 @@
         </div>
     </div>
 
+    <script src="config.js"></script>
     <script src="bank-core-v2.js"></script>
     <script>
         // Keep user on login form - don't auto-redirect
@@ -144,7 +145,7 @@
             errorMsg.classList.remove('show');
 
             // Call backend API
-            fetch('/api/auth/login', {
+            fetch(`${API_CONFIG.API_BASE_URL}/auth/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
