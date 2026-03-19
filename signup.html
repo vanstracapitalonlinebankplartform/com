@@ -382,7 +382,7 @@
         </div>
     </div>
     
-    <script src="bank-core-v2.js"></script>
+    <script src="config.js"></script>
     <script>
         // PIN input handling
         function handlePinInput(input, index) {
@@ -496,33 +496,57 @@
             submitBtn.disabled = true;
             submitBtn.textContent = 'Creating Account...';
             
-            // Create account
-            setTimeout(() => {
-                const result = VanstraBank.createAccount({
+            // Create account via backend API
+            fetch(`${API_CONFIG.API_BASE_URL}/auth/signup`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
                     fullName,
                     email,
-                    dateOfBirth,
-                    phone,
                     password,
-                    pin
-                });
-                
-                if (result.success) {
-                    // Store session
-                    localStorage.setItem('currentSession', result.sessionToken);
-                    // Redirect to dashboard
-                    window.location.href = 'dashboard-v2.html';
+                    phone
+                    // Note: Backend will auto-generate account number and set up account
+                    // PIN will be handled separately for transaction verification
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Store auth token
+                    localStorage.setItem('authToken', data.token);
+                    localStorage.setItem('currentSession', data.token);
+                    showError('Account created successfully! Redirecting to login...', true);
+                    setTimeout(() => {
+                        window.location.href = 'verify-otp.html?tempToken=' + encodeURIComponent(data.token) + '&email=' + encodeURIComponent(email);
+                    }, 1500);
                 } else {
-                    showError(result.error);
+                    showError(data.message || 'Failed to create account');
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'Create Account';
                 }
-            }, 500);
+            })
+            .catch(error => {
+                console.error('Signup error:', error);
+                showError('An error occurred. Please try again.');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Create Account';
+            });
         }
         
-        function showError(message) {
+        function showError(message, isSuccess = false) {
             const errorBanner = document.getElementById('errorBanner');
             errorBanner.textContent = message;
+            if (isSuccess) {
+                errorBanner.style.background = '#DBEAFE';
+                errorBanner.style.borderColor = '#93C5FD';
+                errorBanner.style.color = '#1E40AF';
+            } else {
+                errorBanner.style.background = '#FEE2E2';
+                errorBanner.style.borderColor = '#FECACA';
+                errorBanner.style.color = '#991B1B';
+            }
             errorBanner.classList.add('show');
             errorBanner.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
