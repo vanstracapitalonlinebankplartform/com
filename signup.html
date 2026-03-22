@@ -257,6 +257,11 @@
             text-decoration: none;
         }
         
+        /* Confirm PIN form group margin */
+        .form-group:last-of-type {
+            margin-bottom: 0;
+        }
+        
         @media (max-width: 480px) {
             .signup-card {
                 padding: 1.25rem;
@@ -300,7 +305,7 @@
                 
                 <div class="form-group">
                     <label class="form-label">Date of Birth <span class="required">*</span></label>
-                    <input type="date" id="dob" class="form-input" required>
+                    <input type="date" id="dob" class="form-input" placeholder="YYYY-MM-DD" required>
                 </div>
                 
                 <div class="form-group">
@@ -348,7 +353,7 @@
                         <input type="hidden" id="pin" required>
                     </div>
                     
-                    <div class="form-group" style="margin-bottom: 0;">
+                    <div class="form-group confirm-pin-group">
                         <label class="form-label">Confirm PIN</label>
                         <div class="pin-inputs">
                             <input type="password" class="pin-digit" maxlength="1" data-pin-confirm="1" aria-label="Confirm PIN digit 1" oninput="handlePinConfirmInput(this, 1)" onkeydown="handlePinConfirmKeydown(event, 1)">
