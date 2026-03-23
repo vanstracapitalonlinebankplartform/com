@@ -516,7 +516,12 @@
                     // PIN will be handled separately for transaction verification
                 })
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => { throw new Error(err.message || 'Failed to create account'); });
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.success) {
                     // Store auth token

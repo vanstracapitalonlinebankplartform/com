@@ -152,7 +152,12 @@
                 },
                 body: JSON.stringify({ email, password })
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => { throw new Error(err.message || 'Login failed'); });
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.success && data.requiresOTP) {
                     // Redirect to OTP verification page with temp token and email
