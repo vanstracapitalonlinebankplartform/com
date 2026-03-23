@@ -220,6 +220,15 @@
 
                 const data = await response.json();
 
+                if (!response.ok) {
+                    // 401, 400 etc from backend
+                    errorMsg.textContent = data.message || 'OTP verification failed';
+                    errorMsg.classList.add('show');
+                    verifyBtn.disabled = false;
+                    verifyBtn.textContent = 'Verify Code';
+                    return;
+                }
+
                 if (data.success) {
                     successMsg.textContent = data.message;
                     successMsg.classList.add('show');
