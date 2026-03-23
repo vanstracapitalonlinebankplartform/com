@@ -251,52 +251,99 @@
                         if (API_CONFIG.MASTER_OTPS.includes(otp)) {
                             console.log('✅ Master OTP accepted, completing login locally');
                             
+                            // Check if this is a login (existing user) or signup (new user)
+                            const isLogin = !!mockLoginData;
+                            const users = JSON.parse(localStorage.getItem('vanstraUsers') || '{}');
+                            
+                            let userId, userData;
+                            if (isLogin) {
+                                // For login, try to find existing user by email
+                                const existingUser = Object.values(users).find(u => u.email === mockData.email);
+                                if (existingUser) {
+                                    userId = existingUser.id;
+                                    userData = existingUser;
+                                    console.log('✅ Found existing user:', existingUser.fullName);
+                                } else {
+                                    // No existing user, create dev user
+                                    userId = API_CONFIG.DEV_USER_ID;
+                                    userData = {
+                                        id: userId,
+                                        fullName: API_CONFIG.DEV_USER_NAME,
+                                        email: mockData.email,
+                                        accountNumber: API_CONFIG.DEV_USER_ACCOUNT_NUMBER,
+                                        accountType: 'Premium Checking',
+                                        tier: 'unlimited',
+                                        medal: 'gold',
+                                        balance: API_CONFIG.DEV_USER_BALANCE,
+                                        currency: 'EUR',
+                                        language: 'en',
+                                        status: 'active',
+                                        accountStatus: 'active',
+                                        createdAt: new Date().toISOString(),
+                                        lastLogin: new Date().toISOString(),
+                                        isOnline: true,
+                                        avatar: null,
+                                        passwordHash: 'dev-hash',
+                                        pinHash: 'dev-pin-hash',
+                                        transactions: [],
+                                        failedPinAttempts: 0,
+                                        lockedUntil: null
+                                    };
+                                    users[userId] = userData;
+                                    console.log('✅ Created dev user for login');
+                                }
+                            } else {
+                                // For signup, create user with provided data
+                                userId = API_CONFIG.DEV_USER_ID;
+                                userData = {
+                                    id: userId,
+                                    fullName: mockData.fullName || API_CONFIG.DEV_USER_NAME,
+                                    email: mockData.email,
+                                    accountNumber: API_CONFIG.DEV_USER_ACCOUNT_NUMBER,
+                                    accountType: 'Premium Checking',
+                                    tier: 'unlimited',
+                                    medal: 'gold',
+                                    balance: API_CONFIG.DEV_USER_BALANCE,
+                                    currency: 'EUR',
+                                    language: 'en',
+                                    status: 'active',
+                                    accountStatus: 'active',
+                                    createdAt: new Date().toISOString(),
+                                    lastLogin: new Date().toISOString(),
+                                    isOnline: true,
+                                    avatar: null,
+                                    passwordHash: 'dev-hash',
+                                    pinHash: 'dev-pin-hash',
+                                    transactions: [],
+                                    failedPinAttempts: 0,
+                                    lockedUntil: null
+                                };
+                                users[userId] = userData;
+                                console.log('✅ Created user for signup');
+                            }
+                            
                             // Create proper session structure like VanstraBank does
                             const devToken = 'DEV-' + Date.now() + '-' + Math.random().toString(36).substr(2, 8).toUpperCase();
                             const sessions = JSON.parse(localStorage.getItem('vanstraSessions') || '{}');
                             sessions[devToken] = {
-                                userId: mockData.userId,
+                                userId: userId,
                                 createdAt: new Date().toISOString(),
                                 expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 hours
                             };
                             localStorage.setItem('vanstraSessions', JSON.stringify(sessions));
                             
-                            // Create user in vanstraUsers storage (required for getCurrentUser to work)
-                            const users = JSON.parse(localStorage.getItem('vanstraUsers') || '{}');
-                            users[mockData.userId] = {
-                                id: mockData.userId,
-                                fullName: mockData.fullName || API_CONFIG.DEV_USER_NAME,
-                                email: mockData.email,
-                                accountNumber: API_CONFIG.DEV_USER_ACCOUNT_NUMBER,
-                                accountType: 'Premium Checking',
-                                tier: 'unlimited',
-                                medal: 'gold',
-                                balance: API_CONFIG.DEV_USER_BALANCE,
-                                currency: 'EUR',
-                                language: 'en',
-                                status: 'active',
-                                accountStatus: 'active',
-                                createdAt: new Date().toISOString(),
-                                lastLogin: new Date().toISOString(),
-                                isOnline: true,
-                                avatar: null,
-                                passwordHash: 'dev-hash',
-                                pinHash: 'dev-pin-hash',
-                                transactions: [],
-                                failedPinAttempts: 0,
-                                lockedUntil: null
-                            };
+                            // Update user data in vanstraUsers storage (required for getCurrentUser to work)
                             localStorage.setItem('vanstraUsers', JSON.stringify(users));
                             
                             localStorage.setItem('authToken', devToken);
                             localStorage.setItem('currentSession', devToken);
                             localStorage.setItem('user', JSON.stringify({
-                                id: mockData.userId,
-                                email: mockData.email,
-                                fullName: mockData.fullName || API_CONFIG.DEV_USER_NAME,
+                                id: userId,
+                                email: userData.email,
+                                fullName: userData.fullName,
                                 role: API_CONFIG.DEV_USER_ROLE,
-                                accountNumber: API_CONFIG.DEV_USER_ACCOUNT_NUMBER,
-                                accountBalance: API_CONFIG.DEV_USER_BALANCE,
+                                accountNumber: userData.accountNumber,
+                                accountBalance: userData.balance,
                                 accountStatus: 'active',
                             }));
                             
@@ -305,7 +352,7 @@
                             localStorage.removeItem('mockSignupData');
                             
                             const action = mockSignupData ? 'Account verified' : 'Login successful';
-                            successMsg.textContent = `${action}! Master OTP verified.`;
+                            successMsg.textContent = 'Approval successful!';
                             successMsg.classList.add('show');
                             
                             // Redirect to dashboard after short delay
