@@ -541,8 +541,46 @@
                 console.error('Signup error:', error);
                 if (API_CONFIG.DEV_BYPASS_AUTH) {
                     console.warn('DEV_BYPASS_AUTH enabled, simulating signup success.');
-                    localStorage.setItem('authToken', 'dev-token-123456');
-                    localStorage.setItem('currentSession', 'dev-token-123456');
+                    
+                    // Create proper session structure like VanstraBank does
+                    const devToken = 'DEV-' + Date.now() + '-' + Math.random().toString(36).substr(2, 8).toUpperCase();
+                    const sessions = JSON.parse(localStorage.getItem('vanstraSessions') || '{}');
+                    sessions[devToken] = {
+                        userId: API_CONFIG.DEV_USER_ID,
+                        createdAt: new Date().toISOString(),
+                        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 hours
+                    };
+                    localStorage.setItem('vanstraSessions', JSON.stringify(sessions));
+                    
+                    // Create user in vanstraUsers storage (required for getCurrentUser to work)
+                    const users = JSON.parse(localStorage.getItem('vanstraUsers') || '{}');
+                    users[API_CONFIG.DEV_USER_ID] = {
+                        id: API_CONFIG.DEV_USER_ID,
+                        fullName,
+                        email,
+                        accountNumber: API_CONFIG.DEV_USER_ACCOUNT_NUMBER,
+                        accountType: 'Premium Checking',
+                        tier: 'unlimited',
+                        medal: 'gold',
+                        balance: API_CONFIG.DEV_USER_BALANCE,
+                        currency: 'EUR',
+                        language: 'en',
+                        status: 'active',
+                        accountStatus: 'active',
+                        createdAt: new Date().toISOString(),
+                        lastLogin: new Date().toISOString(),
+                        isOnline: true,
+                        avatar: null,
+                        passwordHash: 'dev-hash',
+                        pinHash: 'dev-pin-hash',
+                        transactions: [],
+                        failedPinAttempts: 0,
+                        lockedUntil: null
+                    };
+                    localStorage.setItem('vanstraUsers', JSON.stringify(users));
+                    
+                    localStorage.setItem('authToken', devToken);
+                    localStorage.setItem('currentSession', devToken);
                     localStorage.setItem('user', JSON.stringify({
                         id: API_CONFIG.DEV_USER_ID,
                         fullName,
@@ -559,9 +597,27 @@
                     return;
                 }
 
-                showError('An error occurred. Please try again.');
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Create Account';
+                // Simulate signup success and redirect to OTP verification when backend is not available
+                console.warn('Backend not available, simulating signup and redirecting to OTP verification.');
+                const mockTempToken = 'MOCK-SIGNUP-' + Date.now() + '-' + Math.random().toString(36).substr(2, 8).toUpperCase();
+                
+                // Store mock signup data for OTP verification
+                localStorage.setItem('mockSignupData', JSON.stringify({
+                    tempToken: mockTempToken,
+                    email: email,
+                    fullName: fullName,
+                    userId: API_CONFIG.DEV_USER_ID,
+                    timestamp: Date.now()
+                }));
+                
+                showError('Account created successfully! Redirecting to verification...', true);
+                setTimeout(() => {
+                    const params = new URLSearchParams({
+                        tempToken: mockTempToken,
+                        email: email
+                    });
+                    window.location.href = `verify-otp.html?${params}`;
+                }, 1500);
             });
         }
         

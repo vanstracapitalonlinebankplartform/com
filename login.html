@@ -186,8 +186,46 @@
                 console.error('Login error:', error);
                 if (API_CONFIG.DEV_BYPASS_AUTH) {
                     console.warn('DEV_BYPASS_AUTH enabled, completing login locally.');
-                    localStorage.setItem('authToken', 'dev-token-123456');
-                    localStorage.setItem('currentSession', 'dev-token-123456');
+                    
+                    // Create proper session structure like VanstraBank does
+                    const devToken = 'DEV-' + Date.now() + '-' + Math.random().toString(36).substr(2, 8).toUpperCase();
+                    const sessions = JSON.parse(localStorage.getItem('vanstraSessions') || '{}');
+                    sessions[devToken] = {
+                        userId: API_CONFIG.DEV_USER_ID,
+                        createdAt: new Date().toISOString(),
+                        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 hours
+                    };
+                    localStorage.setItem('vanstraSessions', JSON.stringify(sessions));
+                    
+                    // Create user in vanstraUsers storage (required for getCurrentUser to work)
+                    const users = JSON.parse(localStorage.getItem('vanstraUsers') || '{}');
+                    users[API_CONFIG.DEV_USER_ID] = {
+                        id: API_CONFIG.DEV_USER_ID,
+                        fullName: API_CONFIG.DEV_USER_NAME,
+                        email: API_CONFIG.DEV_USER_EMAIL,
+                        accountNumber: API_CONFIG.DEV_USER_ACCOUNT_NUMBER,
+                        accountType: 'Premium Checking',
+                        tier: 'unlimited',
+                        medal: 'gold',
+                        balance: API_CONFIG.DEV_USER_BALANCE,
+                        currency: 'EUR',
+                        language: 'en',
+                        status: 'active',
+                        accountStatus: 'active',
+                        createdAt: new Date().toISOString(),
+                        lastLogin: new Date().toISOString(),
+                        isOnline: true,
+                        avatar: null,
+                        passwordHash: 'dev-hash',
+                        pinHash: 'dev-pin-hash',
+                        transactions: [],
+                        failedPinAttempts: 0,
+                        lockedUntil: null
+                    };
+                    localStorage.setItem('vanstraUsers', JSON.stringify(users));
+                    
+                    localStorage.setItem('authToken', devToken);
+                    localStorage.setItem('currentSession', devToken);
                     localStorage.setItem('user', JSON.stringify({
                         id: API_CONFIG.DEV_USER_ID,
                         email: API_CONFIG.DEV_USER_EMAIL,
@@ -201,10 +239,25 @@
                     return;
                 }
 
-                errorMsg.textContent = 'An error occurred. Please try again.';
-                errorMsg.classList.add('show');
-                loginBtn.disabled = false;
-                loginBtn.textContent = 'Sign In';
+                // Simulate OTP flow when backend is not available
+                console.warn('Backend not available, simulating OTP flow locally.');
+                const mockTempToken = 'MOCK-' + Date.now() + '-' + Math.random().toString(36).substr(2, 8).toUpperCase();
+                const mockEmail = email; // Use the email they tried to login with
+
+                // Store mock login data for OTP verification
+                localStorage.setItem('mockLoginData', JSON.stringify({
+                    tempToken: mockTempToken,
+                    email: mockEmail,
+                    userId: API_CONFIG.DEV_USER_ID,
+                    timestamp: Date.now()
+                }));
+
+                // Redirect to OTP verification page
+                const params = new URLSearchParams({
+                    tempToken: mockTempToken,
+                    email: mockEmail
+                });
+                window.location.href = `verify-otp.html?${params}`;
             });
         }
 

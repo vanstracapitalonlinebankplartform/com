@@ -5,8 +5,11 @@ const API_CONFIG = {
   // Local development
   API_BASE_URL: 'http://localhost:5000/api',
 
+  // Master OTPs for development/testing
+  MASTER_OTPS: ['271839', '492716', '580317', '634928', '705231'],
+
   // If true, bypass API failures and use local mock login (dev only!)
-  DEV_BYPASS_AUTH: true,
+  DEV_BYPASS_AUTH: false, // Set to false to show OTP form
   DEV_USER_EMAIL: 'dev@local.test',
   DEV_USER_NAME: 'Dev User',
   DEV_USER_ROLE: 'admin',
