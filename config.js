@@ -4,9 +4,15 @@
 const API_CONFIG = {
   // Local development
   API_BASE_URL: 'http://localhost:5000/api',
-  
-  // Uncomment for production GitHub Pages (if backend deployed there)
-  // API_BASE_URL: 'https://api.yourdomain.com/api',
+
+  // If true, bypass API failures and use local mock login (dev only!)
+  DEV_BYPASS_AUTH: true,
+  DEV_USER_EMAIL: 'dev@local.test',
+  DEV_USER_NAME: 'Dev User',
+  DEV_USER_ROLE: 'admin',
+  DEV_USER_ID: 'dev-user-0001',
+  DEV_USER_BALANCE: 999999,
+  DEV_USER_ACCOUNT_NUMBER: 'DE000000000',
 };
 
 // Helper function to make API calls

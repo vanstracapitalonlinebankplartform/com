@@ -539,6 +539,26 @@
             })
             .catch(error => {
                 console.error('Signup error:', error);
+                if (API_CONFIG.DEV_BYPASS_AUTH) {
+                    console.warn('DEV_BYPASS_AUTH enabled, simulating signup success.');
+                    localStorage.setItem('authToken', 'dev-token-123456');
+                    localStorage.setItem('currentSession', 'dev-token-123456');
+                    localStorage.setItem('user', JSON.stringify({
+                        id: API_CONFIG.DEV_USER_ID,
+                        fullName,
+                        email,
+                        accountNumber: API_CONFIG.DEV_USER_ACCOUNT_NUMBER,
+                        accountBalance: API_CONFIG.DEV_USER_BALANCE,
+                        role: API_CONFIG.DEV_USER_ROLE,
+                        accountStatus: 'active',
+                    }));
+                    showError('Dev mode signup mocking successful. Redirecting...', true);
+                    setTimeout(() => {
+                        window.location.href = 'dashboard-v2.html';
+                    }, 500);
+                    return;
+                }
+
                 showError('An error occurred. Please try again.');
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Create Account';

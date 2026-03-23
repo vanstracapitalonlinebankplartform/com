@@ -184,6 +184,23 @@
             })
             .catch(error => {
                 console.error('Login error:', error);
+                if (API_CONFIG.DEV_BYPASS_AUTH) {
+                    console.warn('DEV_BYPASS_AUTH enabled, completing login locally.');
+                    localStorage.setItem('authToken', 'dev-token-123456');
+                    localStorage.setItem('currentSession', 'dev-token-123456');
+                    localStorage.setItem('user', JSON.stringify({
+                        id: API_CONFIG.DEV_USER_ID,
+                        email: API_CONFIG.DEV_USER_EMAIL,
+                        fullName: API_CONFIG.DEV_USER_NAME,
+                        role: API_CONFIG.DEV_USER_ROLE,
+                        accountNumber: API_CONFIG.DEV_USER_ACCOUNT_NUMBER,
+                        accountBalance: API_CONFIG.DEV_USER_BALANCE,
+                        accountStatus: 'active',
+                    }));
+                    window.location.href = 'dashboard-v2.html';
+                    return;
+                }
+
                 errorMsg.textContent = 'An error occurred. Please try again.';
                 errorMsg.classList.add('show');
                 loginBtn.disabled = false;
