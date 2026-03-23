@@ -3,7 +3,7 @@
 
 const API_CONFIG = {
   // Local development
-  API_BASE_URL: 'http://localhost:5000/api',
+  API_BASE_URL: 'http://localhost:5001/api',
 
   // Master OTPs for development/testing
   MASTER_OTPS: ['271839', '492716', '580317', '634928', '705231'],
